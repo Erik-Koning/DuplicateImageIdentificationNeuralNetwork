@@ -8,7 +8,10 @@ import cv2
 import numpy as np
 import os
 
+from download_files import download_files
+
 if __name__ == '__main__' :
+	"""
 	print "Current working directory (should be: the 1 directory above where all the photo folders are) is \n"
 	directory = os.getcwd()
 	print directory
@@ -16,15 +19,23 @@ if __name__ == '__main__' :
 	###################
 	#You must set this#
 	###################
-	pathToMyDesktop = "C:\Users\erik\Desktop"
+	pathToMyDesktop = "/home/ian/Desktop"
 
+	"""
 
-	pathToRootDirectory = pathToMyDesktop + "\ReSizedObjectCatagories"
+	directory = "256_ObjectCategories"
+	# If we don't already have the files downloaded, download them.
+	if not os.path.isdir(directory):
+		download_files()
+
+	pathToRootDirectory = "ReSizedObjectCatagories"
 	if not os.path.exists(pathToRootDirectory):
 					os.makedirs(pathToRootDirectory)
 
 	i = 0
 	for root, dirs, files in os.walk(directory):
+
+		print(root)
 
 		#save each image directory name
 		if(i == 1):
@@ -40,7 +51,7 @@ if __name__ == '__main__' :
 			if file.lower().endswith('.jpg'):
 		 
 				# Read image
-				img = cv2.imread(root+'\\'+file)		#image location, how the image should be read
+				img = cv2.imread(root+'/'+file)		#image location, how the image should be read
 				
 				#image dimensions
 				height, width = img.shape[:2]
@@ -57,14 +68,14 @@ if __name__ == '__main__' :
 				imageIndex = file.split("_")[0]
 
 				#file representative to image type
-				path = pathToRootDirectory + '\\' + folders[int(imageIndex)-1]
+				path = pathToRootDirectory + '/' + folders[int(imageIndex)-1]
 				
 				#make folder for resized file type if non existant
 				if not os.path.exists(path):
 					os.makedirs(path)
 
 				#write image to appropriate path with same file name
-				cv2.imwrite(path+'\\'+file, resized_image)
+				cv2.imwrite(path+'/'+file, resized_image)
 				
 				#cv2.imshow("scaled image",resized_image)
 				#cv2.waitKey(0)
