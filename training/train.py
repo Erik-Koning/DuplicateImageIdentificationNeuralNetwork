@@ -6,6 +6,8 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
+from config import * #Configuration options, like HEIGHT or WIDTH.
+
 tf.estimator = tf.contrib.learn
 
 tf.logging.set_verbosity(tf.logging.INFO)
@@ -15,15 +17,14 @@ tf.logging.set_verbosity(tf.logging.INFO)
 # Features is the input data, in a batch.
 # Labels is a 1D array of result vaules.
 def cnn_model_fn(features, labels, mode):
-	# Input Layer
-	input_layer = tf.reshape(features["x"], [-1, 28, 28, 1])
-#	input_layer = tf.reshape(features, [-1, 28, 28, 1])
+	# Input Layer, combine the two images into one image with 6 channels.
+	input_layer = tf.reshape(features["x"], [-1, HEIGHT, WIDTH, 6])
 
 	me_too_thanks = "same"
 
 	conv1 = tf.layers.conv2d(
 		inputs = input_layer,
-		filters = 32,
+		filters = CHANNELS[0],
 		kernel_size = [5,5],
 		#Padding = same means that output is same dimension as input (last is 32)
 		padding = me_too_thanks,
@@ -33,7 +34,7 @@ def cnn_model_fn(features, labels, mode):
 
 	conv2 = tf.layers.conv2d(
 		inputs = pool1,
-		filters = 64,
+		filters = CHANNELS[2],
 		kernel_size = [5,5],
 		#Padding = same means that output is same dimension as input (last is 32)
 		padding = me_too_thanks,
@@ -41,9 +42,9 @@ def cnn_model_fn(features, labels, mode):
 
 	pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=2, strides=2)
 	
-	pool2_flat = tf.reshape(pool2, [-1, 7 * 7 * 64])
+	pool2_flat = tf.reshape(pool2, [-1, HEIGHT/2**LAYERS * WIDTH/2**LAYERS * CHANNELS[2]])
 	
-	dense = tf.layers.dense(inputs=pool2_flat, units=1024, activation=tf.nn.relu)
+	dense = tf.layers.dense(inputs=pool2_flat, units=DENSE_NODES, activation=tf.nn.relu)
 
 	dropout = tf.layers.dropout(
 		inputs = dense,
