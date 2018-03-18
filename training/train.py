@@ -5,6 +5,8 @@ from __future__ import print_function
 # Library imports
 import numpy as np
 import tensorflow as tf
+import cv2 #cv2.imread for reading images.
+import os #path
 
 # Local file imports
 from model_fn import cnn_model_fn
@@ -18,20 +20,50 @@ def combine_images(im1, im2):
 	transposed = np.transpose(combined, (1,2,0,3))
 	return transposed.reshape(HEIGHT, WIDTH, 6) # 6 channels
 
+# Returns a tuple containing (data, labels), where data is a 4-d array and labels is a 1D array.
+# kind should be train, test, or validation
+def get_data(kind):
+	# Path to the data
+	testpath = os.path.join('..', 'data', 'output', kind)
+	# Paths to the true and false test cases
+	truepath = os.path.join(testpath, 'true_cases')
+	falsepath = os.path.join(testpath, 'false_cases')
+
+	# The data we will return.
+	data = []
+	labels = [] #The labels we will return.
+	files = sorted(os.listdir(truepath))
+	for f1,f2 in zip(files[::2], files[1::2]):
+		# Go through pairs of files.
+		im1 = cv2.imread(f1)
+		im2 = cv2.imread(f2)
+		
+		data.append(combine_images(im1, im2))
+		labels.append(true) #This is a true case.
+
+	# Now import the false test cases.
+	files = sorted(os.listdir(falsepath))
+	for f1,f2 in zip(files[::2], files[1::2]):
+		# Go through pairs of files.
+		im1 = cv2.imread(f1)
+		im2 = cv2.imread(f2)
+		
+		data.append(combine_images(im1, im2))
+		labels.append(false) #This is a true case.
+
+	return np.array(data), np.array(labels)
+
 def main(unused_argv):
 	# Load the training and test data.
-	mnist = tf.contrib.learn.datasets.load_dataset("mnist")
-	train_data = mnist.train.images # Returns an np.array
-	train_labels = np.asarray(mnist.train.labels, dtype=np.int32)
-	test_data = mnist.test.images
-	test_labels = np.asarray(mnist.test.labels, dtype=np.int32)
+	train_data, train_labels = get_data('train') # Returns an np.array
+	test_data, test_labels = get_data('test') # Returns an np.array
 
 	#Allocate 90% of the GPU's memory.
 	config = tf.contrib.learn.RunConfig(gpu_memory_fraction=0.9)
 	
 	mnist_classifier = tf.contrib.learn.Estimator(
 		model_fn = cnn_model_fn,
-		model_dir = "/tmp/mnist_convnet_model",
+		model_dir = os.path.join("..", 'data', 'generated_network'),
 		config = config
 		)
 
