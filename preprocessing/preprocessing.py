@@ -7,10 +7,27 @@
 import cv2
 import numpy as np
 import os
+import errno #EEXIST
 
 from download_files import download_files
 
+# Creates the specified directory structure, if it doesn't exist already.
+def make_path(path):
+	try:
+		os.makedirs(path)
+	except OSError as e:
+		# Ignore errors if the path already exists.
+		if e.errno != errno.EEXIST:
+			# Propagate any other errors.
+			raise
+
 if __name__ == '__main__' :
+	# Location of this script.
+	path_to_script = os.path.dirname(os.path.realpath(__file__))
+
+	# Change directory to the path containing this script so that we can call it from anywhere.
+	os.chdir(path_to_script)
+
 	"""
 	print "Current working directory (should be: the 1 directory above where all the photo folders are) is \n"
 	directory = os.getcwd()
@@ -22,11 +39,17 @@ if __name__ == '__main__' :
 	pathToMyDesktop = "/home/ian/Desktop"
 
 	"""
+	
+	#Path to ../data, where the data goes.
+	datapath = os.path.join("..","data")
+	
+	make_path(datapath)
 
-	directory = "256_ObjectCategories"
+	# Directory to which the files will be downloaded.
+	directory = os.path.join(datapath,"256_ObjectCategories")
 	# If we don't already have the files downloaded, download them.
 	if not os.path.isdir(directory):
-		download_files()
+		download_files(datapath)
 
 	pathToRootDirectory = "ReSizedObjectCatagories"
 	if not os.path.exists(pathToRootDirectory):
