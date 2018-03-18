@@ -74,15 +74,15 @@ def main(unused_argv):
 	train_input_fn = tf.contrib.learn.io.numpy_input_fn(
 		x = {"x": train_data},
 		y = train_labels,
-		batch_size = 100,
-		num_epochs = None,
+		batch_size = BATCH_SIZE,
+		num_epochs = EPOCHS,
 		shuffle = True
 	)
 	
 
 	mnist_classifier.fit(
 		input_fn = train_input_fn,
-		max_steps = 20000,
+#		max_steps = 20000,
 		monitors = [logging_hook]
 		)
 	
