@@ -15,7 +15,7 @@ import random #Uniform
 from download_files import download_files
 
 # 80% of data will be for training, 20% of data will be for testing/validation.
-TRAIN_TEST_RATIO = 0.8
+TRAIN_AMOUNT = 0.8
 # Size of output images.
 HEIGHT = 128
 WIDTH = 128
@@ -37,18 +37,6 @@ def main():
 	# Change directory to the path containing this script so that we can call it from anywhere.
 	os.chdir(path_to_script)
 
-	"""
-	print "Current working directory (should be: the 1 directory above where all the photo folders are) is \n"
-	directory = os.getcwd()
-	print directory
-
-	###################
-	#You must set this#
-	###################
-	pathToMyDesktop = "/home/ian/Desktop"
-
-	"""
-	
 	# Path to ../data, where the data goes.
 	datapath = os.path.join("..","data")
 	
@@ -80,93 +68,80 @@ def main():
 
 	# 256_ObjectCategories is a directory of directories, each subdirectory
 	# containing objects of one class.
-	categories = [dir for dir in os.listdir(filedir) if os.isdir(dir)]
+	categories = (os.path.join(filedir,dir) for dir in os.listdir(filedir))
+	categories = (path for path in categories if os.path.isdir(path)) #Filter out non-directories.
 
+	traincount = 0
+	testcount = 0
+	total = 0.00001
 
-	traincount = 0.01
-	testcount = 0.01
+	# The last image we scanned in.
+	# On the first image, there is no previous image, so we'll
+	# just use HEIGHTxWIDTH of black pixels to generate a wrong
+	# image for false test cases.
+	previous_image = np.zeros([HEIGHT, WIDTH, 3])
 
 	for category in categories:
-		for imagepath in os.listdir(category):
+		imagefiles = (file for file in os.listdir(category) if os.path.isfile(os.path.join(category,file)))
+
+		# Note: imagefile does not contain the whole path, just the name of the file.
+		for imagefile in imagefiles:
+			# The actual path to the image.
+			imagepath = os.path.join(category, imagefile)
+			print(imagepath)
+
 			image = cv2.imread(imagepath)
-			
+
+			if image is None:
+				# We read something that wasn't an image.
+				continue #Just go on to the next file.
+
 	                # Image dimensions
-        	        height, width = img.shape[:2]
+        	        height, width = image.shape[:2]
 
 			# Resize the image by a random ratio
 			ratio = random.uniform(0.5,2.0)
-			resized_image = cv2.resize(image, (height*ratio, width*ratio))
+			# Need to cast height and width to an integer.
+			resized_image = cv2.resize(image, (int(height*ratio), int(width*ratio)))
 
 			# Now make both images 128x128
 			image = cv2.resize(image, (HEIGHT, WIDTH))
 			resized_image = cv2.resize(resized_image, (HEIGHT, WIDTH))
 
+			# If we're above the ratio, we need more testing cases.
+			if traincount/total > TRAIN_AMOUNT:
+				testcount += 1
+				# Directory to write the generated images.
+				out_true_dir = test_true_path
+				out_false_dir = test_false_path
+			else:
+				traincount += 1
+				# Directory to write the generated images.
+				out_true_dir = train_true_path
+				out_false_dir = train_false_path
+
+			# Split off the extension of the file and the filename itself.
+			image_filename, image_ext = os.path.splitext(imagefile)
+
+			# First image will have the same name as the original, but with "a"
+			# on the end, second will have "b" on the end.
+			im1dest = os.path.join(out_true_dir, image_filename+"a"+image_ext)
+			im2dest = os.path.join(out_true_dir, image_filename+"b"+image_ext)
 			
+			# Write out the two images.
+			cv2.imwrite(im1dest, image)
+			cv2.imwrite(im2dest, resized_image)
 
-"""
-	pathToRootDirectory = "ReSizedObjectCatagories"
-	if not os.path.exists(pathToRootDirectory):
-					os.makedirs(pathToRootDirectory)
-
-    i = 0
-    for root, dirs, files in os.walk(directory):
-
-        #save each image directory name
-        if(i == 1):
-            folders = dirs
-
-        #loop counter
-        i+=1
-        #print i,"\nroot:\n", root,"\ndirs:\n", dirs,"\nfiles:\n",files     #testing
-        
-        #look at each possible image in directory
-        for file in files:
-            print file
-            if file.lower().endswith('.jpg'):
-         
-                # Read image
-                img = cv2.imread(root+'\\'+file)		#image location, how the image should be read
-                
-                #image dimensions
-                height, width = img.shape[:2]
-
-                if(width > 128):
-                    #scale down while keeping content of image, results in some stretching
-                    ratio = width/128
-                    height = height/ratio
-                
-                #resizing image
-                resized_image = cv2.resize(img, (128, height))    #w , h
-                
-                #Accessor index for directory name in array "folders"
-                imageIndex = file.split("_")[0]
-
-                #file representative to image type
-                path = pathToRootDirectory + '\\' + folders[int(imageIndex)-1]
-                
-                #make folder for resized file type if non existant
-                if not os.path.exists(path):
-                    os.makedirs(path)
-
-                #write image to appropriate path with same file name
-                cv2.imwrite(path+'\\'+file, resized_image)
-                
-                #cv2.imshow("scaled image",resized_image)
-                #cv2.waitKey(0)
-
-    path = "C:\Users\erik\Desktop\ReSizedObjectCatagories\Training"
-    if not os.path.exists(path):
-        os.makedirs(path)    
-    path = "C:\Users\erik\Desktop\ReSizedObjectCatagories\Testing"
-    if not os.path.exists(path):
-        os.makedirs(path)    
-    path = "C:\Users\erik\Desktop\ReSizedObjectCatagories\Validation"
-    if not os.path.exists(path):
-        os.makedirs(path)    
-    print i
-    cv2.waitKey(0)
-
-"""
+			# Path to the pair of images for the false case.
+			im1dest = os.path.join(out_false_dir, image_filename+"a"+image_ext)
+			im2dest = os.path.join(out_false_dir, image_filename+"b"+image_ext)
+			
+			# Write out the two images.
+			cv2.imwrite(im1dest, image)
+			cv2.imwrite(im2dest, previous_image)
+			
+			previous_image = image
+			total += 1
 
 
 if __name__ == '__main__' :
