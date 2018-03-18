@@ -11,7 +11,7 @@ from config import * #Configuration options, like HEIGHT or WIDTH.
 # Features is the input data, in a batch.
 # Labels is a 1D array of result vaules.
 def cnn_model_fn(features, labels, mode):
-	# Input Layer, combine the two images into one image with 6 channels.
+	# Input Layer. Not sure if we need the reshape.
 	input_layer = tf.reshape(features["x"], [-1, HEIGHT, WIDTH, 6])
 
 	conv1 = tf.layers.conv2d(

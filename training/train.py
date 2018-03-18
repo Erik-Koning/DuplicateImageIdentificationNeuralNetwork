@@ -8,8 +8,15 @@ import tensorflow as tf
 
 # Local file imports
 from model_fn import cnn_model_fn
+from config import * #Configuration options like HEGIHT or WIDTH
 
 tf.logging.set_verbosity(tf.logging.INFO)
+
+# Combines the two imported images into one numpy.ndarray with 6 "channels"
+def combine_images(im1, im2):
+	combined = np.array((im1, im2), dtype=np.float16)
+	transposed = np.transpose(combined, (1,2,0,3))
+	return transposed.reshape(HEIGHT, WIDTH, 6) # 6 channels
 
 def main(unused_argv):
 	# Load the training and test data.
