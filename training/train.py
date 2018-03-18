@@ -18,8 +18,11 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 def main(argv):
 	# Load the training and testing data.
+	print("Importing training data...")
 	train_data, train_labels = read_data.get_data('train')
+	print("Importing testing data...")
 	test_data, test_labels = read_data.get_data('test')
+	print("Data importing has finished.")
 
 	#Allocate 90% of the GPU's memory.
 	config = tf.contrib.learn.RunConfig(gpu_memory_fraction=0.9)

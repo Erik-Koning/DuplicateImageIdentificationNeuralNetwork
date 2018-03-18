@@ -20,3 +20,6 @@ DENSE_NODES = 1024
 # Size of each batch, and the number of epochs to run.
 BATCH_SIZE = 64
 EPOCHS = 10
+
+# Amount of seconds between status updates when importing data.
+SECONDS_PER_PRINT = 1
