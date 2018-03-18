@@ -10,9 +10,13 @@ import os #path
 # Local file imports
 from config import * #Configuration options like HEGIHT or WIDTH
 
+# Calls os.listdir, but returns the full path to each object.
+def list_full_path(path):
+	return [os.path.join(path,x) for x in os.listdir(path)]
+
 # Combines the two imported images into one numpy.ndarray with 6 "channels"
 def combine_images(im1, im2):
-	combined = np.array((im1, im2), dtype=np.float16)
+	combined = np.array([im1, im2])
 	transposed = np.transpose(combined, (1,2,0,3))
 	return transposed.reshape(HEIGHT, WIDTH, 6) # 6 channels
 
@@ -28,24 +32,24 @@ def get_data(kind):
 	# The data we will return.
 	data = []
 	labels = [] #The labels we will return.
-	files = sorted(os.listdir(truepath))
+	files = sorted(list_full_path(truepath))
 	for f1,f2 in zip(files[::2], files[1::2]):
 		# Go through pairs of files.
 		im1 = cv2.imread(f1)
 		im2 = cv2.imread(f2)
 		
 		data.append(combine_images(im1, im2))
-		labels.append(true) #This is a true case.
+		labels.append(True) #This is a true case.
 
 	# Now import the false test cases.
-	files = sorted(os.listdir(falsepath))
+	files = sorted(list_full_path(falsepath))
 	for f1,f2 in zip(files[::2], files[1::2]):
 		# Go through pairs of files.
 		im1 = cv2.imread(f1)
 		im2 = cv2.imread(f2)
 		
 		data.append(combine_images(im1, im2))
-		labels.append(false) #This is a true case.
+		labels.append(False) #This is a false case.
 
 	return np.array(data), np.array(labels)
 
