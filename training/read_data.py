@@ -17,7 +17,7 @@ def list_full_path(path):
 
 # Combines the two imported images into one numpy.ndarray with 6 "channels"
 def combine_images(im1, im2):
-	combined = np.array([im1, im2], dtype=np.float32)
+	combined = np.array([im1, im2], dtype=np.uint8)
 	transposed = np.transpose(combined, (1,2,0,3))
 	return transposed.reshape(HEIGHT, WIDTH, 6) # 6 channels
 
@@ -32,14 +32,18 @@ def get_data(kind):
 
 	print("Reading True cases...")
 
-	# The data we will return.
-	data = []
-	labels = [] #The labels we will return.
 	files = sorted(list_full_path(truepath))
 
-#	l = len(files)//10
+#	l = int(len(files)/1.5)
 #	l = l-1 if l%2 else l
 #	files = files[:l]
+
+	num_cases = len(files) #*2 for true and false, /2 for pairs of files.
+	# The data we will return.
+	data = np.ndarray(shape=(num_cases, HEIGHT, WIDTH, 6), dtype=np.uint8)
+	labels = np.ndarray(shape=(num_cases,)) #The labels we will return.
+	case = 0 # Index to the above two arrays.
+
 
 	# The following will be used for console output.
 	testcount = len(files)//2
@@ -47,12 +51,15 @@ def get_data(kind):
 	imported = 0 # Number of imported cases so far.
 	for f1,f2 in zip(files[::2], files[1::2]):
 		# Go through pairs of files.
-		im1 = cv2.imread(f1).astype(np.float32)
-		im2 = cv2.imread(f2).astype(np.float32)
+		im1 = cv2.imread(f1)
+		im2 = cv2.imread(f2)
 		
-		data.append(combine_images(im1, im2))
-		labels.append(True) #This is a true case.
+		data[case] = combine_images(im1, im2)
+		labels[case] = True #This is a true case.
 		
+		# Increment case number.
+		case += 1
+
 		if time.time() - oldtime > SECONDS_PER_PRINT:
 			oldtime = time.time()
 			print ("Imported", imported, "of", testcount, "cases.")
@@ -64,7 +71,7 @@ def get_data(kind):
 	# Now import the false test cases.
 	files = sorted(list_full_path(falsepath))
 
-#	l = len(files)//10
+#	l = int(len(files)/1.5)
 #	l = l-1 if l%2 else l
 #	files = files[:l]
 
@@ -77,8 +84,10 @@ def get_data(kind):
 		im1 = cv2.imread(f1)
 		im2 = cv2.imread(f2)
 		
-		data.append(combine_images(im1, im2))
-		labels.append(False) #This is a false case.
+		data[case] = combine_images(im1, im2)
+		labels[case] = False #This is a false case.
+
+		case += 1
 
 		if time.time() - oldtime > SECONDS_PER_PRINT:
 			oldtime = time.time()
@@ -86,5 +95,5 @@ def get_data(kind):
 		
 		imported += 1
 
-	return np.array(data), np.array(labels)
+	return data, labels
 

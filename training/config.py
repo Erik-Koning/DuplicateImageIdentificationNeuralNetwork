@@ -23,3 +23,9 @@ EPOCHS = 10
 
 # Amount of seconds between status updates when importing data.
 SECONDS_PER_PRINT = 1
+
+# If true, do training
+DO_TRAIN = True
+
+# If true, do testing
+DO_TEST = True

@@ -14,7 +14,7 @@ def cnn_model_fn(features, labels, mode):
 #	input_layer = tf.reshape(features["x"], [-1, HEIGHT, WIDTH, 6])
 
 	# Output of the previous layer goes into previous.
-	previous = features["x"]
+	previous = tf.cast(features["x"], tf.float32)
 	for i in range(LAYERS):
 		conv = tf.layers.conv2d(
 			inputs = previous,
@@ -54,7 +54,7 @@ def cnn_model_fn(features, labels, mode):
 	logits = tf.layers.dense(inputs=dropout, units=1, activation=tf.nn.sigmoid)
 
 	predictions = {
-		"classes" : tf.argmax(input=logits, axis=1),
+		"classes" : tf.round(logits, name="classes"),
 		"probabilities" : logits
 	}
 	
