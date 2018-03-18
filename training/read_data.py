@@ -20,7 +20,7 @@ def combine_images(im1, im2):
 # kind should be train, test, or validation
 def get_data(kind):
 	# Path to the data
-	testpath = os.path.join('..', 'data', 'output', kind)
+	testpath = os.path.join('..', 'data', kind)
 	# Paths to the true and false test cases
 	truepath = os.path.join(testpath, 'true_cases')
 	falsepath = os.path.join(testpath, 'false_cases')

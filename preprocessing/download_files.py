@@ -20,7 +20,7 @@ def download_files(path):
 	print("Finished download. Now extracting...")
 
 	tar = tarfile.open(filepath)
-	tar.extractall()
+	tar.extractall(path)
 	tar.close()
 
 	print ("Extraction finished.")
