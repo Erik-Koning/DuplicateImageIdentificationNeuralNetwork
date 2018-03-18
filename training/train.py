@@ -12,12 +12,12 @@ from model_fn import cnn_model_fn
 tf.logging.set_verbosity(tf.logging.INFO)
 
 def main(unused_argv):
-	# Load the training and eval data.
+	# Load the training and test data.
 	mnist = tf.contrib.learn.datasets.load_dataset("mnist")
 	train_data = mnist.train.images # Returns an np.array
 	train_labels = np.asarray(mnist.train.labels, dtype=np.int32)
-	eval_data = mnist.test.images
-	eval_labels = np.asarray(mnist.test.labels, dtype=np.int32)
+	test_data = mnist.test.images
+	test_labels = np.asarray(mnist.test.labels, dtype=np.int32)
 
 	#Allocate 90% of the GPU's memory.
 	config = tf.contrib.learn.RunConfig(gpu_memory_fraction=0.9)
@@ -53,20 +53,20 @@ def main(unused_argv):
 #		hooks = [logging_hook]
 #	)
 
-#	eval_input_fn = tf.estimator.inputs.numpy_input_fn(
-	eval_input_fn = tf.contrib.learn.io.numpy_input_fn(
-		x = {"x": eval_data},
-		y = eval_labels,
+#	test_input_fn = tf.estimator.inputs.numpy_input_fn(
+	test_input_fn = tf.contrib.learn.io.numpy_input_fn(
+		x = {"x": test_data},
+		y = test_labels,
 		num_epochs = 1,
 		shuffle = False
 	)
 	
-	eval_results = mnist_classifier.evaluate(
-		input_fn = eval_input_fn
+	test_results = mnist_classifier.evaluate(
+		input_fn = test_input_fn
 	)
 	
 
-	print(eval_results)
+	print(test_results)
 
 if __name__ == "__main__":
   tf.app.run()

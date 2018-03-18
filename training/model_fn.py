@@ -44,21 +44,20 @@ def cnn_model_fn(features, labels, mode):
 		training = mode == tf.contrib.learn.ModeKeys.TRAIN
 	)
 	
-	logits = tf.layers.dense(inputs=dropout, units=10)
+	# This is a binary classifier, so only 1 output node.
+	logits = tf.layers.dense(inputs=dropout, units=1, activation=tf.nn.sigmoid)
 	
 	predictions = {
 		"classes" : tf.argmax(input=logits, axis=1),
-		"probabilities" : tf.nn.softmax(logits, name="softmax_tensor")
+		"probabilities" : logits
 	}
 	
 #	if mode == tf.estimator.ModeKeys.PREDICT:
 	if mode == tf.contrib.learn.ModeKeys.INFER:
 		return tf.contrib.learn.ModelFnOps(mode=mode, predictions=predictions)
 	
-	onehot_labels = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=10)
-
-	loss = tf.losses.softmax_cross_entropy(onehot_labels=onehot_labels, logits=logits)
-
+	# Log Loss is good for binary classifiers.
+	loss = tf.losses.log_loss(labels=labels, predictions=logits)
 
 	if mode == tf.contrib.learn.ModeKeys.TRAIN:
 		# Create optimizer object with learning rate.
