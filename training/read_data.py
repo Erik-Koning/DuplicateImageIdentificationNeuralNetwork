@@ -17,7 +17,7 @@ def list_full_path(path):
 
 # Combines the two imported images into one numpy.ndarray with 6 "channels"
 def combine_images(im1, im2):
-	combined = np.array([im1, im2])
+	combined = np.array([im1, im2], dtype=np.float32)
 	transposed = np.transpose(combined, (1,2,0,3))
 	return transposed.reshape(HEIGHT, WIDTH, 6) # 6 channels
 
@@ -36,14 +36,19 @@ def get_data(kind):
 	data = []
 	labels = [] #The labels we will return.
 	files = sorted(list_full_path(truepath))
+
+#	l = len(files)//10
+#	l = l-1 if l%2 else l
+#	files = files[:l]
+
 	# The following will be used for console output.
 	testcount = len(files)//2
 	oldtime = time.time()
 	imported = 0 # Number of imported cases so far.
 	for f1,f2 in zip(files[::2], files[1::2]):
 		# Go through pairs of files.
-		im1 = cv2.imread(f1)
-		im2 = cv2.imread(f2)
+		im1 = cv2.imread(f1).astype(np.float32)
+		im2 = cv2.imread(f2).astype(np.float32)
 		
 		data.append(combine_images(im1, im2))
 		labels.append(True) #This is a true case.
@@ -58,6 +63,11 @@ def get_data(kind):
 
 	# Now import the false test cases.
 	files = sorted(list_full_path(falsepath))
+
+#	l = len(files)//10
+#	l = l-1 if l%2 else l
+#	files = files[:l]
+
 	# The following will be used for console output.
 	testcount = len(files)//2
 	oldtime = time.time()

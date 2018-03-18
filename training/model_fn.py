@@ -40,7 +40,7 @@ def cnn_model_fn(features, labels, mode):
 		pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=2, strides=2)
 		"""
 
-	pool_flat = tf.reshape(previous, [-1, HEIGHT/2**LAYERS * WIDTH/2**LAYERS * CHANNELS[LAYERS-1]])
+	pool_flat = tf.reshape(previous, [-1, HEIGHT//2**LAYERS * WIDTH//2**LAYERS * CHANNELS[LAYERS-1]])
 	
 	dense = tf.layers.dense(inputs=pool_flat, units=DENSE_NODES, activation=tf.nn.relu)
 
@@ -52,12 +52,15 @@ def cnn_model_fn(features, labels, mode):
 	
 	# This is a binary classifier, so only 1 output node.
 	logits = tf.layers.dense(inputs=dropout, units=1, activation=tf.nn.sigmoid)
-	
+
 	predictions = {
 		"classes" : tf.argmax(input=logits, axis=1),
 		"probabilities" : logits
 	}
 	
+	# Make each label be part of a vector of size one.
+	labels = tf.reshape(labels, [-1, 1])
+
 #	if mode == tf.estimator.ModeKeys.PREDICT:
 	if mode == tf.contrib.learn.ModeKeys.INFER:
 		return tf.contrib.learn.ModelFnOps(mode=mode, predictions=predictions)

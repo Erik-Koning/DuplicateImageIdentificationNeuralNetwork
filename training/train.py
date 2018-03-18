@@ -33,7 +33,7 @@ def main(argv):
 		config = config
 		)
 
-	tensors_to_log = {"probabilities": "softmax_tensor"}
+	tensors_to_log = {} #{"probabilities": "softmax_tensor"}
 	logging_hook = tf.train.LoggingTensorHook(tensors=tensors_to_log, every_n_iter=500)
 	
 #	train_input_fn = tf.estimator.inputs.numpy_input_fn(
