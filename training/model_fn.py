@@ -11,32 +11,38 @@ from config import * #Configuration options, like HEIGHT or WIDTH.
 # Features is the input data, in a batch.
 # Labels is a 1D array of result vaules.
 def cnn_model_fn(features, labels, mode):
-	# Input Layer. Not sure if we need the reshape.
-	input_layer = tf.reshape(features["x"], [-1, HEIGHT, WIDTH, 6])
+#	input_layer = tf.reshape(features["x"], [-1, HEIGHT, WIDTH, 6])
 
-	conv1 = tf.layers.conv2d(
-		inputs = input_layer,
-		filters = CHANNELS[0],
-		kernel_size = [5,5],
-		#Padding = same means that output is same dimension as input (last is 32)
-		padding = "same",
-		activation = tf.nn.relu)
-	
-	pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2,2], strides = 2)
+	# Output of the previous layer goes into previous.
+	previous = features["x"]
+	for i in range(LAYERS):
+		conv = tf.layers.conv2d(
+			inputs = previous,
+			filters = CHANNELS[i],
+			kernel_size = [KERNEL_SIZE,KERNEL_SIZE],
+			#Padding = same means that output is same dimension as input (last is 32)
+			padding = "same",
+			activation = tf.nn.relu)
+		
+		pool = tf.layers.max_pooling2d(inputs=conv, pool_size=[POOL_SIZE,POOL_SIZE], strides = 2)
 
-	conv2 = tf.layers.conv2d(
-		inputs = pool1,
-		filters = CHANNELS[2],
-		kernel_size = [5,5],
-		#Padding = same means that output is same dimension as input (last is 32)
-		padding = "same",
-		activation = tf.nn.relu)
+		previous = pool
 
-	pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=2, strides=2)
+		""" 
+		conv2 = tf.layers.conv2d(
+			inputs = pool1,
+			filters = CHANNELS[1],
+			kernel_size = [5,5],
+			#Padding = same means that output is same dimension as input (last is 32)
+			padding = "same",
+			activation = tf.nn.relu)
+
+		pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=2, strides=2)
+		"""
+
+	pool_flat = tf.reshape(previous, [-1, HEIGHT/2**LAYERS * WIDTH/2**LAYERS * CHANNELS[LAYERS-1]])
 	
-	pool2_flat = tf.reshape(pool2, [-1, HEIGHT/2**LAYERS * WIDTH/2**LAYERS * CHANNELS[2]])
-	
-	dense = tf.layers.dense(inputs=pool2_flat, units=DENSE_NODES, activation=tf.nn.relu)
+	dense = tf.layers.dense(inputs=pool_flat, units=DENSE_NODES, activation=tf.nn.relu)
 
 	dropout = tf.layers.dropout(
 		inputs = dense,
