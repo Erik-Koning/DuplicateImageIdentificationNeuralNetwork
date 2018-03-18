@@ -1,5 +1,5 @@
 #CISC 452
-#Erik Koning
+
 #March 14, 2018
 #Python 2.7 built with cv2
 #please set line 17
@@ -68,6 +68,14 @@ if __name__ == '__main__' :
                 
                 #cv2.imshow("scaled image",resized_image)
                 #cv2.waitKey(0)
-            
+    path = "C:\Users\erik\Desktop\ReSizedObjectCatagories\Training"
+    if not os.path.exists(path):
+        os.makedirs(path)    
+    path = "C:\Users\erik\Desktop\ReSizedObjectCatagories\Testing"
+    if not os.path.exists(path):
+        os.makedirs(path)    
+    path = "C:\Users\erik\Desktop\ReSizedObjectCatagories\Validation"
+    if not os.path.exists(path):
+        os.makedirs(path)    
     print i
     cv2.waitKey(0)
