@@ -90,7 +90,7 @@ def main(argv):
 	
 		# Place to put the comparison between predicted and actual class.
 		output_path = os.path.join("..", "data", "class_comparison.txt")
-		predictions = [res['probabilities'][0] for res in test_results]
+		predictions = [res['probabilities'] for res in test_results]
 		with open(output_path, "w") as fp:
 			print("Left: predicted, Right: actual", file=fp)
 			for pred, actual in zip(predictions, test_labels):
