@@ -8,6 +8,9 @@ import tensorflow as tf
 
 from config import * #Configuration options, like HEIGHT or WIDTH.
 
+def leaky_relu(x, alpha):
+	return tf.maximum(x, alpha*x)
+
 # Features is the input data, in a batch.
 # Labels is a 1D array of result vaules.
 def cnn_model_fn(features, labels, mode):
@@ -21,8 +24,10 @@ def cnn_model_fn(features, labels, mode):
 			filters = CHANNELS[i],
 			kernel_size = [KERNEL_SIZE,KERNEL_SIZE],
 			#Padding = same means that output is same dimension as input (last is 32)
-			padding = "same",
-			activation = tf.nn.relu)
+			padding = "same") #,
+#			activation = tf.nn.relu)
+		
+		conv = tf.layers.batch_normalization(leaky_relu(conv,0.01))
 		
 		pool = tf.layers.max_pooling2d(inputs=conv, pool_size=[POOL_SIZE,POOL_SIZE], strides = 2)
 
@@ -42,7 +47,10 @@ def cnn_model_fn(features, labels, mode):
 
 	pool_flat = tf.reshape(previous, [-1, HEIGHT//2**LAYERS * WIDTH//2**LAYERS * CHANNELS[LAYERS-1]])
 	
-	dense = tf.layers.dense(inputs=pool_flat, units=DENSE_NODES, activation=tf.nn.relu)
+	dense = tf.layers.dense(inputs=pool_flat, units=DENSE_NODES) #, activation=tf.nn.relu)
+	
+	#Apply leaky relu activation function.
+	dense = leaky_relu(dense, 0.01)
 
 	dropout = tf.layers.dropout(
 		inputs = dense,
@@ -66,11 +74,13 @@ def cnn_model_fn(features, labels, mode):
 		return tf.contrib.learn.ModelFnOps(mode=mode, predictions=predictions)
 	
 	# Log Loss is good for binary classifiers.
-	loss = tf.losses.log_loss(labels=labels, predictions=logits)
+#	loss = tf.losses.log_loss(labels=labels, predictions=logits)
+	loss = tf.losses.absolute_difference(labels=labels, predictions=logits)
 
 	if mode == tf.contrib.learn.ModeKeys.TRAIN:
 		# Create optimizer object with learning rate.
-		optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
+#		optimizer = tf.train.GradientDescentOptimizer(learning_rate=LEARNING_RATE)
+		optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE)
 		train_op = optimizer.minimize(loss, global_step=tf.train.get_global_step())
 		
 		return tf.contrib.learn.ModelFnOps(mode=mode, loss=loss, train_op=train_op)

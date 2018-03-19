@@ -34,9 +34,10 @@ def get_data(kind):
 
 	files = sorted(list_full_path(truepath))
 
-#	l = int(len(files)/1.5)
-#	l = l-1 if l%2 else l
-#	files = files[:l]
+	# Only get DATA_FRACTION of the data.
+	l = int(len(files)*DATA_FRACTION)
+	l = l-1 if l%2 else l
+	files = files[:l]
 
 	num_cases = len(files) #*2 for true and false, /2 for pairs of files.
 	# The data we will return.
@@ -71,9 +72,9 @@ def get_data(kind):
 	# Now import the false test cases.
 	files = sorted(list_full_path(falsepath))
 
-#	l = int(len(files)/1.5)
-#	l = l-1 if l%2 else l
-#	files = files[:l]
+	l = int(len(files)*DATA_FRACTION)
+	l = l-1 if l%2 else l
+	files = files[:l]
 
 	# The following will be used for console output.
 	testcount = len(files)//2
