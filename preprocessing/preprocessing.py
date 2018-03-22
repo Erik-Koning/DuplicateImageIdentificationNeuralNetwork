@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
 #CISC 452
-#Erik Koning
+#Ian Chew, Erik Koning
 #March 14, 2018
 #Python 2.7 built with cv2
-#please set line 17
 
 import cv2
 import numpy as np
@@ -12,7 +11,9 @@ import os
 import errno #EEXIST
 import random #Uniform
 
+# Local files, part of our project.
 from download_files import download_files
+import transformations
 
 # 80% of data will be for training, 20% of data will be for testing/validation.
 TRAIN_AMOUNT = 0.8
@@ -96,13 +97,8 @@ def main():
 				# We read something that wasn't an image.
 				continue #Just go on to the next file.
 
-	                # Image dimensions
-        	        height, width = image.shape[:2]
-
 			# Resize the image by a random ratio
-			ratio = random.uniform(0.5,2.0)
-			# Need to cast height and width to an integer.
-			resized_image = cv2.resize(image, (int(height*ratio), int(width*ratio)))
+			resized_image = transformations.resize(image)
 
 			# Now make both images 128x128
 			image = cv2.resize(image, (HEIGHT, WIDTH))

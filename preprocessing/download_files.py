@@ -15,7 +15,7 @@ def download_files(path):
 		os.system("wget " + url + " -O " + filepath)
 	else:
 		# No progress bar :(
-		urllib.urlretrieve(url, filepath)
+		urllib2.urlretrieve(url, filepath)
 
 	print("Finished download. Now extracting...")
 
