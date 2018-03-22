@@ -12,14 +12,9 @@ import errno #EEXIST
 import random #Uniform
 
 # Local files, part of our project.
+from config import *
 from download_files import download_files
 import transformations
-
-# 80% of data will be for training, 20% of data will be for testing/validation.
-TRAIN_AMOUNT = 0.8
-# Size of output images.
-HEIGHT = 128
-WIDTH = 128
 
 # Creates the specified directory structure, if it doesn't exist already.
 def make_path(path):
