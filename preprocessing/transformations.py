@@ -20,3 +20,7 @@ def compress(image, quality=10):
 	flags = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
 	res, image = cv2.imencode('.jpg', image, flags)
 	return cv2.imdecode(image, 1)
+
+#Crop the image by a random amount.
+def crop(image, lbound = 0.5, hbound=1.0):
+	height, width = image.shape[:2]
