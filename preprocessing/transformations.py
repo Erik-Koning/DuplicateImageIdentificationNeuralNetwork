@@ -21,6 +21,19 @@ def compress(image, quality=10):
 	res, image = cv2.imencode('.jpg', image, flags)
 	return cv2.imdecode(image, 1)
 
-#Crop the image by a random amount.
+# Crop the image by a random amount.
+# lbound=0.5 => crop at most half the image off on each axis.
 def crop(image, lbound = 0.5, hbound=1.0):
+	# Need to divide the amount to delete by 2, since
+	# we will delete off of both ends.
+	lbound = 1 - (1 - lbound)/2
 	height, width = image.shape[:2]
+	# New lower bound of the height
+	hlow = int((1-random.uniform(lbound, hbound))*height)
+	# New upper bound of the height (will be cropped from hlow:hhigh)
+	hhigh = int(random.uniform(lbound, hbound)*height)
+	wlow = int((1-random.uniform(lbound, hbound))*width)
+	whigh = int(random.uniform(lbound, hbound)*width)
+
+	# Do a slice to crop the image.
+	return image[hlow:hhigh, wlow:whigh]
