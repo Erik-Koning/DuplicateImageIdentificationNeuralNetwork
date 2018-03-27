@@ -71,6 +71,11 @@ def main():
 	testcount = 0
 	total = 0.00001
 
+	# List of transformations we can do to the images.
+	# Each will be selected will equal
+	tf_table = [transformations.resize, transformations.crop, transformations.compress]
+	tf_count = len(tf_table)
+
 	# The last image we scanned in.
 	# On the first image, there is no previous image, so we'll
 	# just use HEIGHTxWIDTH of black pixels to generate a wrong
@@ -92,12 +97,15 @@ def main():
 				# We read something that wasn't an image.
 				continue #Just go on to the next file.
 
-			# Resize the image by a random ratio
-			resized_image = transformations.resize(image)
+			# Now we need to decide what transformation to do to the image.
+			tf_table_index = int(total%tf_count)
+
+			# Do the selected transformation to the image.
+			transformed_image = tf_table[tf_table_index](image)
 
 			# Now make both images 128x128
 			image = cv2.resize(image, (HEIGHT, WIDTH))
-			resized_image = cv2.resize(resized_image, (HEIGHT, WIDTH))
+			transformed_image = cv2.resize(transformed_image, (HEIGHT, WIDTH))
 
 			# If we're above the ratio, we need more testing cases.
 			if traincount/total > TRAIN_AMOUNT:
@@ -121,7 +129,7 @@ def main():
 			
 			# Write out the two images.
 			cv2.imwrite(im1dest, image)
-			cv2.imwrite(im2dest, resized_image)
+			cv2.imwrite(im2dest, transformed_image)
 
 			# Path to the pair of images for the false case.
 			im1dest = os.path.join(out_false_dir, image_filename+"a"+image_ext)
