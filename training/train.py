@@ -99,6 +99,12 @@ def main(argv):
 			choice = input("Continue? [Y/n]:")
 			if choice.lower()=='n':
 				break
+			choice = input("How many more?:")
+			try:
+				interations = int(choice)
+			except ValueError as e:
+				# Just do another interation
+				pass
 
 
 	# If we're testing, log the classes.
