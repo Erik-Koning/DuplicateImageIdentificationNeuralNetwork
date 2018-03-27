@@ -16,7 +16,21 @@ import read_data #For reading in the data
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
+def train(classifier, train_input_fn):
+	classifier.fit(
+		input_fn = train_input_fn,
+#		max_steps = 20000,
+#		monitors = [logging_hook]
+	)
+	
+
 def main(argv):
+	# -1 = iterate until user stops it.
+	iterations = -1
+	if len(argv) > 1:
+		# Can provide iteration count.
+		iterations = int(argv[1])
+	
 	#Allocate 90% of the GPU's memory.
 	config = tf.contrib.learn.RunConfig(gpu_memory_fraction=0.9)
 	
@@ -44,12 +58,7 @@ def main(argv):
 			shuffle = True
 		)
 		
-	
-		mnist_classifier.fit(
-			input_fn = train_input_fn,
-#			max_steps = 20000,
-#			monitors = [logging_hook]
-			)
+		
 		
 #		mnist_classifier.train(
 #			input_fn = train_input_fn,
@@ -57,10 +66,6 @@ def main(argv):
 #			hooks = [logging_hook]
 #		)
 
-		# Free train_data and test_labels from memory.
-		del train_data
-		del train_labels
-		del train_input_fn
 	
 	if DO_TEST:
 	
@@ -76,17 +81,31 @@ def main(argv):
 			shuffle = False
 		)
 	
-		test_results = mnist_classifier.evaluate(
-			input_fn = test_input_fn,
-		)
 		
-	
-		print(test_results)
-	
+	# Python 2/3 compatibility.
+	input = raw_input
+
+	while (True):
+		if DO_TRAIN:
+			train(mnist_classifier, train_input_fn)
+
+		if DO_TEST:
+			test(mnist_classifier, test_input_fn)
+
+		iterations -= 1
+		# If we're out of iterations, ask the user if
+		# they want to continue.
+		if iterations <= 0:
+			choice = input("Continue? [Y/n]:")
+			if choice.lower()=='n':
+				break
+
+
+	# If we're testing, log the classes.
+	if DO_TEST:
 		test_results = mnist_classifier.predict(
 			input_fn = test_input_fn,
 		)
-	
 	
 		# Place to put the comparison between predicted and actual class.
 		output_path = os.path.join("..", "data", "class_comparison.txt")
@@ -95,6 +114,20 @@ def main(argv):
 			print("Left: predicted, Right: actual", file=fp)
 			for pred, actual in zip(predictions, test_labels):
 				print(pred, actual, file=fp)
+
+
+def test(classifier, test_input_fn,
+         output_path = os.path.join("..", "data", "results.txt")
+        ):
+
+	test_results = classifier.evaluate(
+		input_fn = test_input_fn,
+	)
+
+	#Append the results to the results file.
+	with open(output_path, "a") as fp:
+		print(test_results, file=fp)
+
 
 if __name__ == "__main__":
   tf.app.run()
