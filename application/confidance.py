@@ -52,7 +52,7 @@ def predict(data):
 		input_fn = test_input_fn,
 	)
 
-	return test_results[0]['probabilities'][1]
+	return list(test_results)[0]['probabilities'][1]
 
 # Read in two images, and return the confidance that the two are duplicates.
 def get_confidance(left, right):

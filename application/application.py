@@ -1,7 +1,12 @@
-import Tkinter as tk
-import tkFileDialog
+import tkinter as tk
+import tkinter.filedialog
+#import tkFileDialog
 from PIL import ImageTk, Image
 import os
+
+from confidance import get_confidance
+
+tkFileDialog = tkinter.filedialog
 
 # Get helper functions
 from helper import *
@@ -24,10 +29,6 @@ def get_pairs(lis):
 			right = lis[j]
 			yield left,right
 
-# Read in two images, and return the confidance that the two are duplicates.
-def get_confidance(left, right):
-	return 0.9
-
 def main(argv):
 
 	# Called when we skip the image.
@@ -39,6 +40,7 @@ def main(argv):
 			except StopIteration as e:
 				# The program is over.
 				root.destroy()
+
 			# Get the confidance that the images are duplicates
 			confidance = get_confidance(left, right)
 			if confidance < 0.6:
@@ -74,10 +76,10 @@ def main(argv):
 	imlabel2 = tk.Label(middle_label)
 	imlabel2.pack(side="right")
 
-	images = []
+	images = [1,2]
 
-	images.append(get_file("jpeg-home.jpg", imlabel1))
-	images.append(get_file("compressed.jpg", imlabel2))
+#	images.append(get_file("jpeg-home.jpg", imlabel1))
+#	images.append(get_file("compressed.jpg", imlabel2))
 
 	buttons = tk.Label(root)
 	left_button = tk.Button(buttons, text="Keep left", width=25, command=skip)
