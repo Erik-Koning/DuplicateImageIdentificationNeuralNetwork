@@ -97,4 +97,3 @@ def get_data(kind):
 		imported += 1
 
 	return data, labels
-
