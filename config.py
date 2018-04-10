@@ -21,20 +21,20 @@ POOL_SIZE = 2
 DENSE_NODES = 1024
 
 # Learning rate
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.0005
 
 # Size of each batch, and the number of epochs to run.
 BATCH_SIZE = 64
-EPOCHS = 19
+EPOCHS = 1
 
 # Amount of seconds between status updates when importing data.
 SECONDS_PER_PRINT = 1
 
 # How much of the data to import
-DATA_FRACTION = 1
+DATA_FRACTION = 0.1
 
 # If true, do training
-DO_TRAIN = False
+DO_TRAIN = True
 
 # If true, do testing
 DO_TEST = True
