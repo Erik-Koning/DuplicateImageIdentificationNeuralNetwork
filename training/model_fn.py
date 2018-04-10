@@ -18,6 +18,7 @@ def cnn_model_fn(features, labels, mode):
 
 	input_layer = tf.cast(features["x"], tf.float32)/256
 
+	""" 
 	conv1 = tf.layers.conv2d(
 		inputs = input_layer,
 		filters = CHANNELS[0],
@@ -41,9 +42,9 @@ def cnn_model_fn(features, labels, mode):
 	pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=2, strides=2)
 
 	pool_flat = tf.reshape(pool2, [-1, HEIGHT//2**LAYERS * WIDTH//2**LAYERS * CHANNELS[LAYERS-1]])
+	"""
 
-	""" 
-	previous = tf.cast(features["x"], tf.float32)
+	previous = input_layer
 	for i in range(LAYERS):
 		print(i)
 		conv = tf.layers.conv2d(
@@ -62,8 +63,6 @@ def cnn_model_fn(features, labels, mode):
 
 
 	pool_flat = tf.reshape(previous, [-1, HEIGHT//2**LAYERS * WIDTH//2**LAYERS * CHANNELS[LAYERS-1]])
-
-	"""
 	
 	dense = tf.layers.dense(inputs=pool_flat, units=DENSE_NODES) #, activation=tf.nn.relu)
 	
