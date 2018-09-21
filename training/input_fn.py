@@ -31,9 +31,9 @@ def decompress_combine(images):
 # y is a numpy array of labels.
 def make_input_fn(x, y, batch_size = 128, epochs = 1, shuffle = True):
 	
-	# Convert all features from numpy arrays to tensorflow tensors.
-	for k in x:
-		x[k] = tf.convert_to_tensor(x[k])
+#	# Convert all features from numpy arrays to tensorflow tensors.
+#	for k in x:
+#		x[k] = tf.convert_to_tensor(x[k])
 	
 	dataset = tf.data.Dataset.from_tensor_slices(x,y)
 	

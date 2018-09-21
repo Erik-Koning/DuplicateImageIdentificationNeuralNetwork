@@ -17,6 +17,7 @@ import read_data #For reading in the data
 tf.logging.set_verbosity(tf.logging.INFO)
 
 def train(classifier, train_input_fn):
+	print("Training...")
 	classifier.fit(
 		input_fn = train_input_fn,
 #		max_steps = 20000,
@@ -32,9 +33,9 @@ def main(argv):
 		iterations = int(argv[1])
 	
 	#Allocate 90% of the GPU's memory.
-	config = tf.contrib.learn.RunConfig(gpu_memory_fraction=0.9)
+	config = tf.contrib.learn.RunConfig(gpu_memory_fraction=0.9, keep_checkpoint_max=1)
 	
-	mnist_classifier = tf.contrib.learn.Estimator(
+	classifier = tf.contrib.learn.Estimator(
 		model_fn = cnn_model_fn,
 		model_dir = os.path.join("..", 'data', 'generated_network'),
 		config = config
@@ -60,7 +61,7 @@ def main(argv):
 		
 		
 		
-#		mnist_classifier.train(
+#		classifier.train(
 #			input_fn = train_input_fn,
 #			steps = 20000,
 #			hooks = [logging_hook]
@@ -87,10 +88,10 @@ def main(argv):
 
 	while (True):
 		if DO_TRAIN:
-			train(mnist_classifier, train_input_fn)
+			train(classifier, train_input_fn)
 
 		if DO_TEST:
-			test(mnist_classifier, test_input_fn)
+			test(classifier, test_input_fn, test_labels)
 
 		iterations -= 1
 		# If we're out of iterations, ask the user if
@@ -101,15 +102,15 @@ def main(argv):
 				break
 			choice = input("How many more?:")
 			try:
-				interations = int(choice)
+				iterations = int(choice)
 			except ValueError as e:
 				# Just do another interation
 				pass
 
-
+""" 
 	# If we're testing, log the classes.
 	if DO_TEST:
-		test_results = mnist_classifier.predict(
+		test_results = classifier.predict(
 			input_fn = test_input_fn,
 		)
 	
@@ -120,15 +121,69 @@ def main(argv):
 			print("Left: predicted, Right: actual", file=fp)
 			for pred, actual in zip(predictions, test_labels):
 				print(pred, actual, file=fp)
+"""
 
+def predict(classifier, test_input_fn, labels):
+	test_results = classifier.predict(
+		input_fn = test_input_fn
+	)
+	
+	# Place to put the comparison between predicted and actual class.
+	output_path = os.path.join("..", "data", "class_comparison.txt")
+	predictions = [res['probabilities'] for res in test_results]
+	with open(output_path, "w") as fp:
+		print("Left: predicted, Right: actual", file=fp)
+		for pred, actual in zip(predictions, labels):
+			print(pred, actual, file=fp)
 
-def test(classifier, test_input_fn,
+	predictions = [0 if x[0] > x[1] else 1 for x in predictions]
+
+	# Also write the confusion matrix to the results.
+	output_path = os.path.join("..", "data", "results.txt")
+	
+	cmat = tf.confusion_matrix(labels, predictions)
+	with tf.Session() as sess:
+		mat = sess.run(cmat)
+
+	print("Confusion matrix:")
+	print(mat)
+	
+	#Append the results to the results file.
+	with open(output_path, "a") as fp:
+		print(mat, file=fp)
+	
+
+# Best accuracy so far.
+BEST_A = 0
+
+def test(classifier, test_input_fn, labels,
          output_path = os.path.join("..", "data", "results.txt")
         ):
+
+	print("Testing...")
 
 	test_results = classifier.evaluate(
 		input_fn = test_input_fn,
 	)
+
+	global BEST_A
+
+	acc = test_results['accuracy']
+	if (BEST_A < test_results['accuracy']):
+		print("Best network yet!")
+		print(test_results)
+		model_path = classifier.model_dir
+		best_path = os.path.join("..", "data", "best_net")
+		
+		# Copy over the best model.
+		os.system("rm -rf " + best_path)
+		os.system("cp -rf " + model_path + " " + best_path)
+		BEST_A = acc
+
+		# Do predictions and log confusion matrix.
+		predict(classifier, test_input_fn, labels)
+
+
 
 	#Append the results to the results file.
 	with open(output_path, "a") as fp:

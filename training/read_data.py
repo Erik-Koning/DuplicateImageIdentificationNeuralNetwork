@@ -97,3 +97,29 @@ def get_data(kind):
 		imported += 1
 
 	return data, labels
+
+# Get the data but as a pair of raw binary tensorflow strings for
+# each image.
+def get_data_raw_tensor(kind):
+	# Path to the data
+	testpath = os.path.join('..', 'data', kind)
+	# Paths to the true and false test cases
+	truepath = os.path.join(testpath, 'true_cases')
+	falsepath = os.path.join(testpath, 'false_cases')
+
+	print("Reading True cases...")
+
+	files = sorted(list_full_path(truepath))
+
+	# Only get DATA_FRACTION of the data.
+	l = int(len(files)*DATA_FRACTION)
+	l = l-1 if l%2 else l
+	files = files[:l]
+
+	num_cases = len(files) #*2 for true and false, /2 for pairs of files
+
+	# The data we will return.
+	data = np.ndarray(shape=(num_cases, HEIGHT, WIDTH, 6), dtype=np.uint8)
+	labels = np.ndarray(shape=(num_cases,)) #The labels we will return.
+	case = 0 # Index to the above two arrays.
+	
